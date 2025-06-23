@@ -34,8 +34,9 @@ const SearchBar = () => {
     };
   });
   return (
-    <SafeAreaView>
+    <View>
       <View style={[styles.flexRowBetween, styles.padding]}>
+        <SafeAreaView />
         <TouchableOpacity
           style={styles.searchInputContainer}
           activeOpacity={0.8}>
@@ -84,7 +85,7 @@ const SearchBar = () => {
           />
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

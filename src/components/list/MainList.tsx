@@ -1,6 +1,4 @@
 import {
-  View,
-  Text,
   SectionList,
   NativeSyntheticEvent,
   NativeScrollEvent,
@@ -11,10 +9,13 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import ExploreList from './ExploreList';
 import RestaurantList from './RestaurantList';
 import {useStyles} from 'react-native-unistyles';
-import {restaurantHeaderStyles} from '@unistyles/restuarantStyles';
+import {restaurantStyles} from '@unistyles/restuarantStyles';
 import {useSharedState} from '@features/tabs/SharedContext';
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
 import BackToTopButton from '@components/ui/BackToTopButton';
+import {filtersOption} from '@utils/dummyData';
+import SortingAndFilters from '@components/home/SortingAndFilters';
+import type {ViewabilityConfig} from 'react-native';
 
 const sectionedData = [
   {title: 'Explore', data: [{}], renderItem: () => <ExploreList />},
@@ -22,13 +23,13 @@ const sectionedData = [
 ];
 
 const MainList: FC = () => {
-  const {styles} = useStyles(restaurantHeaderStyles);
+  const {styles} = useStyles(restaurantStyles);
   const {scrollY, scrollToTop, scrollYGlobal} = useSharedState();
   const previousScrollYTopButton = useRef<number>(0);
-  const prevScrollY = useRef<number>(0);
+  const prevScrollY = useRef(0);
   const sectionListRef = useRef<SectionList>(null);
 
-  const [isRestaurantvisible, setisRestaurantvisible] = useState(false);
+  const [isRestaurantVisible, setIsRestaurantVisible] = useState(false);
   const [isNearEnd, setIsNearEnd] = useState(false);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -65,11 +66,11 @@ const MainList: FC = () => {
       scrollYGlobal.value > 180;
 
     const opacity = withTiming(
-      isScrollingUp && (isRestaurantvisible || isNearEnd) ? 1 : 0,
+      isScrollingUp && (isRestaurantVisible || isNearEnd) ? 1 : 0,
       {duration: 300},
     );
     const translateY = withTiming(
-      isScrollingUp && (isRestaurantvisible || isNearEnd) ? 0 : 10,
+      isScrollingUp && (isRestaurantVisible || isNearEnd) ? 0 : 10,
       {duration: 300},
     );
     previousScrollYTopButton.current = scrollYGlobal.value;
@@ -79,8 +80,8 @@ const MainList: FC = () => {
     };
   });
 
-  const viewabilityConfig = {
-    viewAreaCoverPercentageThreshold: 80,
+  const viewabilityConfig: ViewabilityConfig = {
+    viewAreaCoveragePercentThreshold: 80,
   };
 
   const onViewableItemsChanged = ({
@@ -91,16 +92,44 @@ const MainList: FC = () => {
     const restaurantVisible = viewableItems.some(
       item => item?.section?.title === 'Restaurants' && item?.isViewable,
     );
-    setisRestaurantvisible(restaurantVisible);
+    setIsRestaurantVisible(restaurantVisible);
   };
 
   return (
-    <SafeAreaView>
-      <Animated.View>
-        <BackToTopButton onPress={handleScrollToTop}/>
+    <>
+      <Animated.View style={[styles.backToTopButton, backToTopStyle]}>
+        <BackToTopButton onPress={handleScrollToTop} />
       </Animated.View>
-      <SectionList sections={sectionedData} />
-    </SafeAreaView>
+      <SectionList
+       sections={sectionedData}
+        overScrollMode="always"
+        onScroll={handleScroll}
+        ref={sectionListRef}
+        scrollEventThrottle={16}
+        bounces={false}
+        nestedScrollEnabled
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.listContainer}
+        stickySectionHeadersEnabled={true}
+        viewabilityConfig={viewabilityConfig}
+        onViewableItemsChanged={onViewableItemsChanged}
+        renderSectionHeader={({section}) => {
+          if (section.title !== 'Restaurants') {
+            return null;
+          }
+          return (
+            <Animated.View
+              style={[
+                isRestaurantVisible || isNearEnd ? styles.shadowBottom : null,
+              ]}>
+              <SortingAndFilters menuTitle="Sort" options={filtersOption} />
+            </Animated.View>
+          );
+        }}
+       
+      />
+    </>
   );
 };
 
