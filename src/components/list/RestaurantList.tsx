@@ -38,9 +38,18 @@ const RestaurantList = () => {
         contentContainerStyle={styles.listContainer}
         ListFooterComponent={() => {
           return (
-            <View style={{justifyContent:'center', alignItems:'center',opacity:0.4}}>
-              <CustomText fontFamily='Okra-Medium' variant='h1'>Made with ❤️</CustomText>
-               <CustomText fontFamily='Okra-Medium' variant='h5'>By - Sanjay Kumar</CustomText>
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                opacity: 0.4,
+              }}>
+              <CustomText fontFamily="Okra-Medium" variant="h1">
+                Made with ❤️
+              </CustomText>
+              <CustomText fontFamily="Okra-Medium" variant="h5">
+                By - Sanjay Kumar
+              </CustomText>
             </View>
           );
         }}
